@@ -7,20 +7,25 @@ namespace DefaultNamespace
 {
 	public class PositionSaver : MonoBehaviour
 	{
-		public struct Data
+        [Serializable]
+        public struct Data
 		{
 			public Vector3 Position;
 			public float Time;
 		}
 
-		private TextAsset _json;
+		[SerializeField]
+        [Tooltip("для заполнения этого поля нужно воспользоваться контекстным меню в инспекторе и командой “Create File”")]
+        private TextAsset _json;
 
-		public List<Data> Records { get; private set; }
+        [SerializeField, HideInInspector]
+        public List<Data> Records { get; private set; }
 
 		private void Awake()
 		{
-			//todo comment: Что будет, если в теле этого условия не сделать выход из метода?
-			if (_json == null)
+            //todo comment: Что будет, если в теле этого условия не сделать выход из метода?
+            //если не сделать return, выполнение продолжится дальше
+            if (_json == null)
 			{
 				gameObject.SetActive(false);
 				Debug.LogError("Please, create TextAsset and add in field _json");
@@ -41,8 +46,9 @@ namespace DefaultNamespace
 			var prev = data[0].Position;
 			Gizmos.color = Color.green;
 			Gizmos.DrawWireSphere(prev, 0.3f);
-			//todo comment: Почему итерация начинается не с нулевого элемента?
-			for (int i = 1; i < data.Count; i++)
+            //todo comment: Почему итерация начинается не с нулевого элемента?
+            //gотому что элемент с индексом 0 это начальная точка
+            for (int i = 1; i < data.Count; i++)
 			{
 				var curr = data[i].Position;
 				Gizmos.DrawWireSphere(curr, 0.3f);
@@ -56,7 +62,8 @@ namespace DefaultNamespace
 		private void CreateFile()
 		{
 			//todo comment: Что происходит в этой строке?
-			var stream = File.Create(Path.Combine(Application.dataPath, "Path.txt"));
+			//создаётся файл Path.txt
+            var stream = File.Create(Path.Combine(Application.dataPath, "Path.txt"));
 			//todo comment: Подумайте для чего нужна эта строка? (а потом проверьте догадку, закомментировав) 
 			stream.Dispose();
 			UnityEditor.AssetDatabase.Refresh();
@@ -76,8 +83,9 @@ namespace DefaultNamespace
 					UnityEditor.EditorUtility.SetDirty(this);
 					UnityEditor.AssetDatabase.SaveAssets();
 					UnityEditor.AssetDatabase.Refresh();
-					//todo comment: Почему мы здесь выходим, а не продолжаем итерироваться?
-					return;
+                    //todo comment: Почему мы здесь выходим, а не продолжаем итерироваться?
+                    //нужный уже найден, продолжать поиск остальных бессмысленно
+                    return;
 				}
 			}
 		}

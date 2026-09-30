@@ -8,17 +8,25 @@ namespace DefaultNamespace
 	{
 		private PositionSaver _save;
 		private float _currentDelay;
-		
-		//todo comment: Что произойдёт, если _delay > _duration?
-		private float _delay = 0.5f;
-		private float _duration = 5f;
+
+        //todo comment: Что произойдёт, если _delay > _duration?
+        //точка не будет сохранена
+        [Range(0.2f, 1.0f)]
+        private float _delay = 0.5f;
+        [Min(0.2f)]
+        private float _duration = 5f;
 
 		private void Start()
 		{
-			//todo comment: Почему этот поиск производится здесь, а не в начале метода Update?
-			_save = GetComponent<PositionSaver>();
+            //todo comment: Почему этот поиск производится здесь, а не в начале метода Update?
+            //компонент ищется один раз, а не каждый кадр
+            _save = GetComponent<PositionSaver>();
 			_save.Records.Clear();
-		}
+            if (_duration <= _delay)
+            {
+                _duration = _delay * 5f;
+            }
+        }
 
 		private void Update()
 		{
@@ -38,8 +46,9 @@ namespace DefaultNamespace
 				_save.Records.Add(new PositionSaver.Data
 				{
 					Position = transform.position,
-					//todo comment: Для чего сохраняется значение игрового времени?
-					Time = Time.time,
+                    //todo comment: Для чего сохраняется значение игрового времени?
+                    //чтобы ReplayMover мог учитывать время между позициями при воспроизведении
+                    Time = Time.time,
 				});
 			}
 		}

@@ -12,8 +12,10 @@ namespace DefaultNamespace
         //todo comment: Что произойдёт, если _delay > _duration?
         //точка не будет сохранена
         [Range(0.2f, 1.0f)]
+        [SerializeField]
         private float _delay = 0.5f;
         [Min(0.2f)]
+        [SerializeField]
         private float _duration = 5f;
 
 		private void Start()
@@ -39,6 +41,7 @@ namespace DefaultNamespace
 			}
 			
 			//todo comment: Почему не написать (_delay -= Time.deltaTime;) по аналогии с полем _duration?
+			//_delay это постоянный интервал, он не должен уменьшаться
 			_currentDelay -= Time.deltaTime;
 			if (_currentDelay <= 0f)
 			{

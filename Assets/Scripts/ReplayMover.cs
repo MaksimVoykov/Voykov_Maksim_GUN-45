@@ -19,8 +19,9 @@ namespace DefaultNamespace
             if (!TryGetComponent(out _save) || _save.Records.Count == 0)
 			{
 				Debug.LogError("Records incorrect value", this);
-				//todo comment: Для чего выключается этот компонент?
-				enabled = false;
+                //todo comment: Для чего выключается этот компонент?
+                //отключаем, чтобы программа не пыталась обработать отсутствующие данные
+                enabled = false;
 			}
 		}
 
@@ -44,9 +45,10 @@ namespace DefaultNamespace
             //todo comment: Для чего производятся эти вычисления (как в дальнейшем они применяются)?
             //здесь вычисляется доля пройденного времени между предыдущей и текущей записанными точками
             var delta = (Time.time - _prev.Time) / (curr.Time - _prev.Time);
-			//todo comment: Зачем нужна эта проверка?
-			//проверяет не получилось ли Nan
-			if (float.IsNaN(delta)) delta = 0f;
+            //todo comment: Зачем нужна эта проверка?
+            //проверяет не получилось ли Nan
+            //знаменатель может стать нулём, если curr.Time и _prev.Time будут одинаковыми
+            if (float.IsNaN(delta)) delta = 0f;
             //todo comment: Опишите, что происходит в этой строчке так подробно, насколько это возможно
             // transform.position — это мировая позиция текущего GameObject
             // _prev.Position — начальная позиция

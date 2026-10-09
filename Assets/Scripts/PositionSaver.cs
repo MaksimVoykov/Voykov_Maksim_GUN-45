@@ -16,15 +16,19 @@ namespace DefaultNamespace
 
 		[SerializeField]
         [Tooltip("для заполнения этого поля нужно воспользоваться контекстным меню в инспекторе и командой “Create File”")]
+        [ReadOnly]
         private TextAsset _json;
 
-        [SerializeField, HideInInspector]
+        [field:SerializeField, HideInInspector]
         public List<Data> Records { get; private set; }
 
 		private void Awake()
 		{
             //todo comment: Что будет, если в теле этого условия не сделать выход из метода?
             //если не сделать return, выполнение продолжится дальше
+            //если убрать return, следующей выполнится строка: JsonUtility.FromJsonOverwrite(_json.text, this);
+            //при обращении к _json.text, когда _json == null возникнет ошибка
+
             if (_json == null)
 			{
 				gameObject.SetActive(false);
@@ -34,6 +38,7 @@ namespace DefaultNamespace
 			
 			JsonUtility.FromJsonOverwrite(_json.text, this);
 			//todo comment: Для чего нужна эта проверка (что она позволяет избежать)?
+			// проверяем существует ли список, если его нет, создаём новый
 			if (Records == null)
 				Records = new List<Data>(10);
 		}
@@ -41,6 +46,7 @@ namespace DefaultNamespace
 		private void OnDrawGizmos()
 		{
 			//todo comment: Зачем нужны эти проверки (что они позволляют избежать)?
+			//проверка защищает от ошибок, если он не был создан или если в нём нет точек
 			if (Records == null || Records.Count == 0) return;
 			var data = Records;
 			var prev = data[0].Position;
@@ -65,6 +71,7 @@ namespace DefaultNamespace
 			//создаётся файл Path.txt
             var stream = File.Create(Path.Combine(Application.dataPath, "Path.txt"));
 			//todo comment: Подумайте для чего нужна эта строка? (а потом проверьте догадку, закомментировав) 
+			//закрываем созданный файл
 			stream.Dispose();
 			UnityEditor.AssetDatabase.Refresh();
 			//В Unity можно искать объекты по их типу, для этого используется префикс "t:"
@@ -76,8 +83,9 @@ namespace DefaultNamespace
 				var path = UnityEditor.AssetDatabase.GUIDToAssetPath(guid);
 				//Этой командой можно загрузить сам ассет
 				var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<TextAsset>(path);
-				//todo comment: Для чего нужны эти проверки?
-				if(asset != null && asset.name == "Path")
+                //todo comment: Для чего нужны эти проверки?
+                //чтобы убедиться, что ассет действительно был найден и имя именно Path
+                if (asset != null && asset.name == "Path")
 				{
 					_json = asset;
 					UnityEditor.EditorUtility.SetDirty(this);
@@ -92,8 +100,13 @@ namespace DefaultNamespace
 
 		private void OnDestroy()
 		{
-			//todo logic...
-		}
+            var json = JsonUtility.ToJson(this);
+            var path = UnityEditor.AssetDatabase.GetAssetPath(_json);
+
+            File.WriteAllText(path, json);
+
+            UnityEditor.AssetDatabase.Refresh();
+        }
 #endif
 	}
 }

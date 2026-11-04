@@ -6,10 +6,10 @@ public class Gates : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Ball"))
+        if (other.TryGetComponent<Ball>(out Ball ball))
         {
             score++;
-            Debug.Log("Текущий игровой счет: " + score);
+            Debug.Log("Текущий счет: " + score);
             Destroy(other.gameObject);
         }
     }
